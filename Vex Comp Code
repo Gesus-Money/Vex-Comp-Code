@@ -1,0 +1,246 @@
+/*----------------------------------------------------------------------------*/
+/*                                                                            */
+/*    Module:       main.cpp                                                  */
+/*    Author:       C:\Users\99774027                                         */
+/*    Created:      Tue Jan 16 2024                                           */
+/*    Description:  V5 project                                                */
+/*                                                                            */
+/*----------------------------------------------------------------------------*/
+
+
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Charger              motor_group   15, 16         
+// Drivetrain           drivetrain    10, 2, 9, 1    
+// Controller1          controller                   
+// DigitalOutB          digital_out   B              
+// Door                 motor         14             
+// ---- END VEXCODE CONFIGURED DEVICES ----
+
+
+#include "vex.h"
+
+
+
+
+using namespace vex;
+
+
+
+
+// A global instance of competition
+competition Competition;
+
+
+
+
+// define your global instances of motors and other devices here
+
+
+
+
+/*---------------------------------------------------------------------------*/
+/*                          Pre-Autonomous Functions                         */
+/*                                                                           */
+/*  You may want to perform some actions before the competition starts.      */
+/*  Do them in the following function.  You must return from this function   */
+/*  or the autonomous and usercontrol tasks will not be started.  This       */
+/*  function is only called once after the V5 has been powered on and        */
+/*  not every time that the robot is disabled.                               */
+/*---------------------------------------------------------------------------*/
+
+
+
+
+void pre_auton(void) {
+// Initializing Robot Configuration. DO NOT REMOVE!
+vexcodeInit();
+Door.setVelocity(10,percent);
+Door.setStopping(hold);
+
+
+// All activities that occur before the competition starts
+// Example: clearing encoders, setting servo positions, ...
+}
+
+
+
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*                              Autonomous Task                              */
+/*                                                                           */
+/*  This task is used to control your robot during the autonomous phase of   */
+/*  a VEX Competition.                                                       */
+/*                                                                           */
+/*  You must modify the code to add your own robot specific commands here.   */
+/*---------------------------------------------------------------------------*/
+
+
+
+
+void autonomous(void) {
+ /*Charger.setVelocity(100, percent);
+ Drivetrain.setTurnVelocity(100, percent);
+ Charger.spin(forward);
+ wait(25, msec);
+ DigitalOutB.set(true);
+ wait(500,msec);
+ Charger.setVelocity(0, percent);
+ Charger.spin(forward);
+ DigitalOutB.set(false);
+ wait(50, msec);*/
+ Drivetrain.driveFor(forward,1000,mm,45,velocityUnits::pct);
+ Drivetrain.turnFor(right,90,degrees);
+ Drivetrain.driveFor(forward,150,mm,45,velocityUnits::pct);
+ Drivetrain.driveFor(reverse,150,mm,45,velocityUnits::pct);
+ Drivetrain.driveFor(forward,175,mm,45,velocityUnits::pct);
+ Drivetrain.driveFor(reverse,150,mm,45,velocityUnits::pct);
+}
+
+
+
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*                              User Control Task                            */
+/*                                                                           */
+/*  This task is used to control your robot during the user control phase of */
+/*  a VEX Competition.                                                       */
+/*                                                                           */
+/*  You must modify the code to add your own robot specific commands here.   */
+/*---------------------------------------------------------------------------*/
+
+
+
+
+void usercontrol(void) {
+ int deadzone = 15;
+ int LMS = Controller1.Axis3.position();
+ int RMS = Controller1.Axis1.position();
+ while(1){
+   LMS = Controller1.Axis3.position();
+   RMS = Controller1.Axis1.position();
+   if (LMS > deadzone) {
+     Drivetrain.setDriveVelocity(100, percent);
+     Drivetrain.drive(forward);
+     wait(50, msec);
+   }
+   else if (LMS < -deadzone){
+     Drivetrain.setDriveVelocity(100, percent);
+     Drivetrain.drive(reverse);
+     wait(50, msec);
+   }
+   else {
+     Drivetrain.setDriveVelocity(0, percent);
+     wait(50, msec);
+    
+   }
+   if (RMS > deadzone) {
+     Drivetrain.setTurnVelocity(100, percent);
+     Drivetrain.turn(right);
+     wait(50, msec);
+    
+   }
+   else if (RMS < -deadzone){
+     Drivetrain.setTurnVelocity(100, percent);
+     Drivetrain.turn(left);
+     wait(50, msec);
+     Brain.Screen.clearScreen();
+     Brain.Screen.setCursor(1, 1);
+     Brain.Screen.print(RMS);
+     Brain.Screen.print("Left");
+     LMS = Controller1.Axis3.position();
+     RMS = Controller1.Axis1.position();
+   }
+   else {
+     Drivetrain.setTurnVelocity(0, percent);
+     wait(50, msec);
+     Brain.Screen.clearScreen();
+     Brain.Screen.setCursor(1, 1);
+     Brain.Screen.print(RMS);
+     Brain.Screen.print("No turn");
+     LMS = Controller1.Axis3.position();
+     RMS = Controller1.Axis1.position();
+   }
+   if (Controller1.ButtonL1.pressing()){
+     Brain.Screen.clearScreen();
+     Brain.Screen.setCursor(1, 1);
+     Brain.Screen.print("Charging");
+     Charger.setVelocity(100, percent);
+     Charger.spin(forward);
+     wait(50, msec);
+   }
+   else{
+     Brain.Screen.clearScreen();
+     Brain.Screen.setCursor(1, 1);
+     Brain.Screen.print("Stop Charge");
+     Charger.setVelocity(0, percent);
+     Charger.spin(forward);
+     wait(50, msec);
+   }
+   if (Controller1.ButtonR1.pressing()){
+     DigitalOutB.set(true);
+     Brain.Screen.clearScreen();
+     Brain.Screen.setCursor(1, 1);
+     Brain.Screen.print("Button pressed");
+     wait(50, msec);
+     Charger.setVelocity(0, percent);
+     Charger.spin(forward);
+     wait(50, msec);
+   }
+   else{
+     DigitalOutB.set(false);
+     Brain.Screen.clearScreen();
+     Brain.Screen.setCursor(1, 1);
+     Brain.Screen.print("Button not pressed");
+     wait(50, msec);
+   }
+   if (Controller1.ButtonR2.pressing()){
+     Door.spin(forward);
+     wait(50,msec);
+   }
+   else if (Controller1.ButtonL2.pressing()){
+     Door.spin(reverse);
+     wait(50,msec);
+   }
+   else{
+     Door.stop();
+     wait(25,msec);
+   }
+ }
+}
+
+
+
+
+//
+// Main will set up the competition functions and callbacks.
+//
+int main() {
+// Set up callbacks for autonomous and driver control periods.
+Competition.autonomous(autonomous);
+Competition.drivercontrol(usercontrol);
+
+
+
+
+// Run the pre-autonomous function.
+pre_auton();
+
+
+
+
+// Prevent main from exiting with an infinite loop.
+while (true) {
+  wait(100, msec);
+}
+}
+
+
+
+
+
+
+
